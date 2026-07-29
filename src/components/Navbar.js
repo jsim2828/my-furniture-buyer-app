@@ -10,12 +10,20 @@ export async function Navbar() {
   return (
     <header className="border-b border-chrome-600/40 bg-aubergine-900">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="font-semibold tracking-wide uppercase text-oyster-100"
-        >
-          Lucky Sofa <span className="text-tangerine-500">88</span>
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="font-semibold tracking-wide uppercase text-oyster-100"
+          >
+            Lucky Sofa <span className="text-tangerine-500">88</span>
+          </Link>
+          <Link
+            href="/about"
+            className="text-sm text-oyster-300 hover:text-marigold-400"
+          >
+            About us
+          </Link>
+        </div>
 
         {user ? (
           <nav className="flex items-center gap-4 text-sm text-oyster-200">
@@ -24,6 +32,9 @@ export async function Navbar() {
             </Link>
             <Link href="/orders" className="hover:text-marigold-400">
               Orders
+            </Link>
+            <Link href="/assistant" className="hover:text-marigold-400">
+              Assistant
             </Link>
             <span className="text-oyster-400">
               Balance:{" "}

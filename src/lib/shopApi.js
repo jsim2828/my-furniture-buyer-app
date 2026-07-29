@@ -35,6 +35,18 @@ export async function searchCatalogue({ category } = {}) {
   return res.json();
 }
 
+// Full detail for a single item (includes the base64 image) — much slower
+// per call than searchCatalogue, so only look up one item at a time with
+// this, never use it to browse or search.
+export async function getProduct(itemId) {
+  const res = await fetch(
+    `${SHOP_API_URL}/catalogue/${encodeURIComponent(itemId)}`,
+    { next: { revalidate: 3600 } }
+  );
+  if (!res.ok) return null;
+  return res.json();
+}
+
 // Account balance and orders require the participant API key.
 
 // Balance and order history are shown on every page (via the navbar), so a
@@ -67,5 +79,5 @@ export async function placeOrder(items) {
     body: JSON.stringify({ user_id: SHOP_API_USER_ID, items }),
   });
   const data = await res.json();
-  return { ok: res.ok, data };
+  return { ok: res.ok, status: res.status, data };
 }

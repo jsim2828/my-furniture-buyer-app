@@ -31,3 +31,8 @@ See `requirements.md` for scope and `architecture.md` for the technical design.
 See `AGENTS.md` — the installed Next.js version may differ from training data;
 check `node_modules/next/dist/docs/` for anything unfamiliar before assuming
 an API doesn't exist.
+
+**Always update `requirements.md` after every change** — after implementing
+a feature, fix, or scope change, update `requirements.md` in the same turn
+so it stays an accurate description of what the app actually does. Don't
+wait to be asked separately.

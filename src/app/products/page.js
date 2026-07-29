@@ -1,10 +1,16 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { getAccount, getCategories, searchCatalogue } from "@/lib/shopApi";
+import {
+  getAccount,
+  getCategories,
+  getOrderHistory,
+  searchCatalogue,
+} from "@/lib/shopApi";
+import { rankBySimilarityToPurchases } from "@/lib/personalize";
 import { BudgetBar } from "@/components/BudgetBar";
 import { CategoryFilter } from "@/components/CategoryFilter";
-import { OrderForm } from "@/components/OrderForm";
+import { CatalogueCard } from "@/components/CatalogueCard";
 
 const PAGE_SIZE = 30;
 
@@ -16,11 +22,14 @@ export default async function ProductsPage({ searchParams }) {
   const category = params.category || "";
   const requestedPage = parseInt(params.page, 10) || 1;
 
-  const [categories, allItems, account] = await Promise.all([
+  const [categories, rawItems, account, orderHistory] = await Promise.all([
     getCategories(),
     searchCatalogue({ category }),
     getAccount(),
+    getOrderHistory(),
   ]);
+
+  const allItems = rankBySimilarityToPurchases(rawItems, orderHistory);
 
   const totalItems = allItems.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
@@ -43,7 +52,11 @@ export default async function ProductsPage({ searchParams }) {
 
       <CategoryFilter categories={categories} selected={category} />
 
-      <OrderForm items={pageItems} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {pageItems.map((item) => (
+          <CatalogueCard key={item.item_id} item={item} />
+        ))}
+      </div>
 
       <div className="flex items-center justify-between text-sm text-oyster-400">
         <span>
