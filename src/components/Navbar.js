@@ -42,6 +42,12 @@ export async function Navbar() {
                 ${account.balance.toFixed(2)}
               </span>
             </span>
+            <span className="text-oyster-400">
+              Plush Points:{" "}
+              <span className="font-medium text-marigold-300">
+                {user.points.toFixed(0)}
+              </span>
+            </span>
             <form action={logoutAction}>
               <button
                 type="submit"

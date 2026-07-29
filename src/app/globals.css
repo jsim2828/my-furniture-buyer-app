@@ -76,3 +76,26 @@ body {
   background-repeat: no-repeat;
   min-height: 100%;
 }
+
+/* A single bright "you won!" flash for a completed purchase — one pulse,
+   not a repeated strobe. */
+@keyframes purchase-flash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.purchase-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    var(--color-oyster-100) 0%,
+    var(--color-marigold-400) 35%,
+    var(--color-tangerine-500) 70%,
+    transparent 100%
+  );
+  animation: purchase-flash 0.8s ease-out forwards;
+}

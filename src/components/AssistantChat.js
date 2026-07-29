@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PurchaseCelebration } from "@/components/PurchaseCelebration";
 
 export function AssistantChat() {
   const [messages, setMessages] = useState([]);
@@ -9,6 +10,7 @@ export function AssistantChat() {
   const [error, setError] = useState(null);
   const [pendingOrder, setPendingOrder] = useState(null);
   const [confirming, setConfirming] = useState(false);
+  const [celebration, setCelebration] = useState(null);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -66,6 +68,7 @@ export function AssistantChat() {
       const text = data.message || "Something went wrong placing that order.";
 
       setMessages((prev) => [...prev, { role: "assistant", content: text }]);
+      if (data.ok) setCelebration(data.pointsAwarded);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -82,6 +85,12 @@ export function AssistantChat() {
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
+      {celebration != null && (
+        <PurchaseCelebration
+          pointsAwarded={celebration}
+          onDismiss={() => setCelebration(null)}
+        />
+      )}
       <div className="flex flex-col gap-3 min-h-[300px] rounded-lg border border-chrome-600/30 bg-aubergine-800 p-4">
         {messages.length === 0 && (
           <p className="text-oyster-400 text-sm">
@@ -129,6 +138,11 @@ export function AssistantChat() {
               <span>Total</span>
               <span>${pendingOrder.total_price.toFixed(2)}</span>
             </div>
+            <p className="text-xs text-oyster-400">
+              {pendingOrder.paidWithPoints
+                ? "Fully covered by your Plush Points — no balance charged."
+                : "Not fully covered by points — this will charge your account balance."}
+            </p>
             <div className="flex items-center gap-3 mt-1 flex-wrap">
               <button
                 type="button"

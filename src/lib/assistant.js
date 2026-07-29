@@ -19,7 +19,7 @@ const SYSTEM_PROMPT = `You are the shopping assistant for Lucky Sofa 88, a furni
 You have four tools:
 - search_catalogue: browse items, optionally narrowed to one EXACT category from the shop's fixed category list. It has no price, colour, material, or free-text search built in — it only filters by an exact category string, or returns everything if no category is given.
 - get_product_details: fetch full details (dimensions, colours) for one already-known item_id. It's much slower per call than search_catalogue, so only use it to confirm or describe a single item, never to search or browse.
-- check_balance: get the live account balance.
+- check_balance: get the live account balance and Plush Points balance. Plush Points (1 point = $1) automatically pay for an order first if they fully cover its total — otherwise the whole order is charged to the account balance instead, never a mix of both.
 - place_order: stage a specific order (item_id/quantity pairs) for the user to confirm. This does NOT execute the purchase — the app shows the user what's about to be bought and for how much, and only a button click in the app actually completes it.
 
 The API itself cannot understand vague or subjective requests — things like "cheap," "affordable," or a colour. When the buyer asks for something like that, call search_catalogue to get the plain list of matching items (by category if one clearly applies), then apply that judgement yourself by reasoning over the price and colours fields in the results. Do not expect the tool to filter for you, and do not claim it can.
@@ -81,7 +81,7 @@ const TOOLS = [
     function: {
       name: "check_balance",
       description:
-        "Get the live account balance. Returns just a current dollar figure, no spending history.",
+        "Get the live account balance and Plush Points balance. Returns just current figures, no spending history.",
       parameters: { type: "object", properties: {} },
     },
   },
@@ -169,11 +169,6 @@ async function runGetProductDetailsTool({ item_id } = {}) {
   };
 }
 
-async function runCheckBalanceTool() {
-  const account = await getAccount();
-  return { balance: account.balance };
-}
-
 // Doesn't call the real order API — it only resolves each item's
 // authoritative name/price (never trusting whatever the model thinks the
 // price is) and stages the order for the user to confirm via a button in
@@ -208,7 +203,6 @@ async function runPlaceOrderTool({ items } = {}) {
 const TOOL_HANDLERS = {
   search_catalogue: runSearchCatalogueTool,
   get_product_details: runGetProductDetailsTool,
-  check_balance: runCheckBalanceTool,
   place_order: runPlaceOrderTool,
 };
 
@@ -269,7 +263,7 @@ export function describeOrderFailure(status, detail) {
 }
 
 // conversation: [{ role: "user" | "assistant", content: string }, ...]
-export async function chatWithAssistant(conversation, { balance } = {}) {
+export async function chatWithAssistant(conversation, { balance, points } = {}) {
   const categories = await getCategories();
 
   const messages = [
@@ -280,10 +274,31 @@ export async function chatWithAssistant(conversation, { balance } = {}) {
         `\nValid catalogue categories: ${categories.join(", ")}.` +
         (typeof balance === "number"
           ? `\nThe buyer's current account balance is $${balance.toFixed(2)}.`
+          : "") +
+        (typeof points === "number"
+          ? `\nThe buyer has ${points} Plush Points (1 point = $1).`
           : ""),
     },
     ...conversation,
   ];
+
+  // check_balance and place_order need the points balance, which only this
+  // request has — the other handlers are stateless and shared via
+  // TOOL_HANDLERS.
+  const toolHandlers = {
+    ...TOOL_HANDLERS,
+    check_balance: async () => {
+      const account = await getAccount();
+      return { balance: account.balance, points: points ?? 0 };
+    },
+    place_order: async (args) => {
+      const result = await runPlaceOrderTool(args);
+      if (result.status === "confirmation_required" && typeof points === "number") {
+        result.paid_with_points = points >= result.total_price;
+      }
+      return result;
+    },
+  };
 
   let pendingOrder = null;
 
@@ -298,7 +313,7 @@ export async function chatWithAssistant(conversation, { balance } = {}) {
 
     messages.push(message);
     for (const toolCall of message.tool_calls) {
-      const handler = TOOL_HANDLERS[toolCall.function.name];
+      const handler = toolHandlers[toolCall.function.name];
       const args = JSON.parse(toolCall.function.arguments || "{}");
       const result = handler
         ? await handler(args)
@@ -308,7 +323,11 @@ export async function chatWithAssistant(conversation, { balance } = {}) {
         toolCall.function.name === "place_order" &&
         result.status === "confirmation_required"
       ) {
-        pendingOrder = { items: result.items, total_price: result.total_price };
+        pendingOrder = {
+          items: result.items,
+          total_price: result.total_price,
+          paidWithPoints: Boolean(result.paid_with_points),
+        };
       }
 
       messages.push({

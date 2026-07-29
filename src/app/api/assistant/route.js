@@ -14,7 +14,10 @@ export async function POST(request) {
   }
 
   const account = await getAccount();
-  const result = await chatWithAssistant(messages, { balance: account.balance });
+  const result = await chatWithAssistant(messages, {
+    balance: account.balance,
+    points: user.points,
+  });
 
   return Response.json(result);
 }

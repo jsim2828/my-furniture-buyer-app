@@ -47,7 +47,7 @@ export default async function ProductsPage({ searchParams }) {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold mb-4">Catalogue</h1>
-        <BudgetBar balance={account.balance} />
+        <BudgetBar balance={account.balance} points={user.points} />
       </div>
 
       <CategoryFilter categories={categories} selected={category} />

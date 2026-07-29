@@ -53,6 +53,9 @@ hackathon, so scope is intentionally small.
 - The local database's `Product`/`Order`/`OrderItem` tables and the
   sign-up "starting budget" field are left over from the original local
   design and are no longer read from or written to.
+- Any successful purchase — from a catalogue Buy button or the assistant's
+  Confirm & buy — triggers a single bright full-screen flash (a one-off
+  pulse, not a repeated strobe), like winning a prize.
 
 ### AI shopping assistant
 - A logged-in user can type a plain-English request into a chat box (the
