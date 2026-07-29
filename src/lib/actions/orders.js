@@ -2,67 +2,32 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { getRemainingBudget } from "@/lib/budget";
+import { placeOrder } from "@/lib/shopApi";
 
 export async function placeOrderAction(prevState, formData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  // Form fields are named "qty-<productId>". Only keep ones the buyer
+  // Form fields are named "qty-<item_id>". Only keep ones the buyer
   // actually entered a quantity for.
-  const requestedQuantities = [];
+  const items = [];
   for (const [key, value] of formData.entries()) {
     if (!key.startsWith("qty-")) continue;
     const quantity = parseInt(value, 10);
     if (Number.isFinite(quantity) && quantity > 0) {
-      requestedQuantities.push({
-        productId: Number(key.replace("qty-", "")),
-        quantity,
-      });
+      items.push({ item_id: key.replace("qty-", ""), quantity });
     }
   }
 
-  if (requestedQuantities.length === 0) {
+  if (items.length === 0) {
     return { error: "Choose a quantity for at least one product." };
   }
 
-  const products = await db.product.findMany({
-    where: { id: { in: requestedQuantities.map((r) => r.productId) } },
-  });
-  const productsById = new Map(products.map((p) => [p.id, p]));
-
-  const items = requestedQuantities.map(({ productId, quantity }) => {
-    const product = productsById.get(productId);
-    return {
-      productId,
-      quantity,
-      priceAtPurchase: product.price,
-      lineTotal: product.price * quantity,
-    };
-  });
-  const total = items.reduce((sum, item) => sum + item.lineTotal, 0);
-
-  const remainingBudget = await getRemainingBudget(user);
-  if (total > remainingBudget) {
-    const over = (total - remainingBudget).toFixed(2);
-    return { error: `This order exceeds your remaining budget by $${over}.` };
+  const { ok, data } = await placeOrder(items);
+  if (!ok) {
+    return { error: data.detail || "Order failed." };
   }
-
-  await db.order.create({
-    data: {
-      userId: user.id,
-      total,
-      items: {
-        create: items.map(({ productId, quantity, priceAtPurchase }) => ({
-          productId,
-          quantity,
-          priceAtPurchase,
-        })),
-      },
-    },
-  });
 
   revalidatePath("/orders");
   revalidatePath("/products");

@@ -22,7 +22,9 @@ The user has **no coding background**. Claude Code is responsible for choosing t
 
 ## Status
 Day 1: project scaffolded (Next.js + Tailwind + Prisma/SQLite + bcryptjs/iron-session for auth).
-Catalogue is imported from a shared MongoDB source (see `architecture.md`).
+Login/sessions are still local (Prisma/SQLite). The catalogue, orders, and
+budget/balance are now live against the hackathon's "Product Search API"
+(see `SHOP_API_URL` in `.env` and `architecture.md`) rather than local data.
 See `requirements.md` for scope and `architecture.md` for the technical design.
 
 ## Note for Claude

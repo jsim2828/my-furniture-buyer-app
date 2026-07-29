@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { placeOrderAction } from "@/lib/actions/orders";
-import { ProductCard } from "@/components/ProductCard";
+import { CatalogueCard } from "@/components/CatalogueCard";
 
 const initialState = { error: null };
 
@@ -20,7 +20,7 @@ function SubmitButton() {
   );
 }
 
-export function OrderForm({ products }) {
+export function OrderForm({ items }) {
   const [state, formAction] = useActionState(placeOrderAction, initialState);
 
   return (
@@ -32,8 +32,8 @@ export function OrderForm({ products }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+        {items.map((item) => (
+          <CatalogueCard key={item.item_id} item={item} />
         ))}
       </div>
 

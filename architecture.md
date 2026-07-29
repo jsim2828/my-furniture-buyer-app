@@ -22,21 +22,35 @@ instead of separate API route files — a Next.js feature that lets a page's
 `<form>` call a server-side function directly, without you having to write
 and wire up a matching `/api/...` endpoint by hand. Less code, same result.
 
+Sign up / log in / log out still work exactly as before, entirely against
+the local SQLite database (via Prisma). But the catalogue, orders, and
+budget are now backed by a **live external API** — the hackathon's
+"Product Search API" — instead of local data:
+
 ```
 Browser (user clicks "Place order")
    │  submits the <form> on src/app/products/page.js
    ▼
 Server Action (src/lib/actions/orders.js: placeOrderAction)
-   │  1. checks who's logged in (via the session cookie)
-   │  2. looks up their remaining budget (via Prisma)
-   │  3. compares order total vs. budget
-   │  4. saves the order (via Prisma) OR returns an error message
+   │  1. checks who's logged in (via the local session cookie)
+   │  2. POSTs the cart to the shop API (src/lib/shopApi.js: placeOrder)
    ▼
-SQLite database file (dev.db)
+Shop API (POST https://.../orders, authenticated with SHOP_API_KEY)
+   │  computes the total, checks it against the account's live balance,
+   │  and either saves the order or returns an error message
 ```
 
+The shop API is the source of truth for prices, stock, order history, and
+account balance — this app's own `Order`/`OrderItem`/`Product` tables (see
+below) are no longer read from or written to by the live pages.
+
 ## Data model
-Four tables (defined in `prisma/schema.prisma`):
+Four tables (defined in `prisma/schema.prisma`). Only **User** is used by
+the live app today — it backs this app's own login/session system, which
+is separate from the shop API's own account. The other three tables
+(`Product`, `Order`, `OrderItem`) are left over from the Day 1 scaffold and
+are no longer read from or written to; they're harmless to leave in place,
+but could be dropped in a later cleanup pass.
 
 **User**
 | field | type | notes |
@@ -56,22 +70,25 @@ Four tables (defined in `prisma/schema.prisma`):
 | image | string | local path under `/public/products`, e.g. `/products/00368814.jpg` |
 
 ### Catalog data source
-Products are real furniture data (762 items) imported from a shared MongoDB
-database provided for the hackathon, rather than hand-written placeholders.
-`prisma/seed.js` connects using the `MONGODB_URI` environment variable
-(kept out of source control, in `.env`), reads the `catalog` collection, and
-for each item:
-- maps `product_name` → `name`, `price` → `price`, `category` → `category`
-- decodes the embedded base64 image data to a real `.jpg` file under
-  `public/products/` and stores that file's path as `image`
+The catalogue page (`src/app/products/page.js`) now reads products live
+from the hackathon's shop API (`src/lib/shopApi.js`), not from the local
+database:
+- `GET /catalogue/search-index` — name, category, and price for every item.
+  This is the *fast* endpoint (no images), which is why it's used for
+  browsing. There's also a slower plain `/catalogue/:id` endpoint that
+  embeds a full base64 image per item — deliberately not used here.
+- `GET /catalogue/categories` — the list of categories, used to populate
+  the category filter dropdown.
 
-Images are written to disk rather than kept as base64 in the database so
-product listing pages stay small and fast — the database only stores a short
-path string, and the browser loads each image as a normal cached file
-instead of a large inline blob.
+The catalogue page paginates client-visible results 30 at a time and lets
+the buyer filter by category (both via the `?category=` and `?page=`
+URL query params), then renders quantity inputs for the current page's
+items in `src/components/CatalogueCard.js`.
 
-Re-run `node prisma/seed.js` any time to refresh the catalog from the source
-database (this replaces all existing products).
+`prisma/seed.js` and the `MONGODB_URI` connection still exist from the Day 1
+scaffold (a one-time bulk import of the same 762-item catalog into local
+SQLite, including downloaded images under `public/products/`), but the live
+pages no longer read from that local copy.
 
 **Order**
 | field | type | notes |
@@ -95,24 +112,27 @@ several products, and a product can appear in many orders — `OrderItem` is
 the table in between that links them, with a `quantity` per product.
 
 ## Budget check logic (in plain terms)
-1. User is logged in → we know their `budget`.
-2. We look at all their past orders → sum up the totals → that's
-   `amountSpent`.
-3. `remainingBudget = budget - amountSpent`.
-4. New order is allowed only if `newOrderTotal <= remainingBudget`.
+The buyer's remaining budget is now a live **account balance**, fetched
+straight from the shop API (`GET /users/:user_id`, via
+`src/lib/shopApi.js: getAccount`) — not calculated locally. The shop API is
+also the one that checks a new order against that balance and rejects it
+(with an error message we display) if it would go over. This app no longer
+computes or stores a remaining-budget figure itself.
 
-This is recalculated from order history each time (`src/lib/budget.js`),
-rather than storing a separate "remaining budget" number — that way it can
-never drift out of sync with reality.
+Note: the "Starting budget ($)" field on the sign-up form is still saved
+to the local `User.budget` column, but nothing reads it anymore — the
+number shown throughout the app is always the live balance from the shop
+API's single shared account, regardless of which local user is logged in.
 
 ## Folder responsibilities
 - `src/app/*/page.js` — what the user sees (one folder per page/URL).
 - `src/lib/actions/` — Server Actions: the mutation logic forms submit to
   (register, login, logout, place an order).
-- `src/lib/` — shared setup code: database connection (`db.js`), session/auth
-  helpers (`auth.js`), budget math (`budget.js`).
-- `src/components/` — reusable UI pieces (Navbar, ProductCard, BudgetBar,
-  and the client-side forms that need interactivity).
+- `src/lib/` — shared setup code: local database connection (`db.js`),
+  session/auth helpers (`auth.js`), and the shop API client (`shopApi.js`)
+  that talks to the live catalogue/orders/balance endpoints.
+- `src/components/` — reusable UI pieces (Navbar, CatalogueCard, BudgetBar,
+  CategoryFilter, and the client-side forms that need interactivity).
 - `prisma/schema.prisma` — single source of truth for the database structure.
 - `prisma/seed.js` — fills the catalogue with sample furniture products.
 

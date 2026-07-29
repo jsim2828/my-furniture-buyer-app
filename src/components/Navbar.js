@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { getRemainingBudget } from "@/lib/budget";
+import { getAccount } from "@/lib/shopApi";
 import { logoutAction } from "@/lib/actions/auth";
 
 export async function Navbar() {
   const user = await getCurrentUser();
-  const remainingBudget = user ? await getRemainingBudget(user) : null;
+  const account = user ? await getAccount() : null;
 
   return (
     <header className="border-b border-chrome-600/40 bg-aubergine-900">
@@ -26,9 +26,9 @@ export async function Navbar() {
               Orders
             </Link>
             <span className="text-oyster-400">
-              Budget left:{" "}
+              Balance:{" "}
               <span className="font-medium text-marigold-300">
-                ${remainingBudget.toFixed(2)}
+                ${account.balance.toFixed(2)}
               </span>
             </span>
             <form action={logoutAction}>
