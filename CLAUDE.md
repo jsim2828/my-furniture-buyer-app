@@ -1,7 +1,16 @@
-# Furniture Buyer App
+# Lucky Sofa 88
 
 ## What this is
-A web app built for Day 1 of a hackathon. It's a **buyer's app** for a furniture shop.
+A web app built for Day 1 of a hackathon. It's a **buyer's app** for a furniture shop, branded "Lucky Sofa 88".
+
+## Theme
+1971 Palm Springs glamour — chrome, smoked glass, curved modular seating.
+Warm, dim, lamplit; a room at 11pm, not a showroom at noon. Palette: deep
+aubergine base, burnt marigold and hot tangerine for warmth, chrome silver
+for hardware, soft oyster cream for text/breathing room. Defined as custom
+Tailwind color tokens in `src/app/globals.css` (`aubergine-*`, `marigold-*`,
+`tangerine-*`, `chrome-*`, `oyster-*`) — reuse these rather than introducing
+new colors.
 
 ## Core features
 1. **Login** — a user logs into an account.
@@ -12,7 +21,8 @@ A web app built for Day 1 of a hackathon. It's a **buyer's app** for a furniture
 The user has **no coding background**. Claude Code is responsible for choosing the technology and writing all the code. Explanations should be given in plain English — assume no prior programming knowledge unless the user demonstrates otherwise over the course of the project.
 
 ## Status
-Day 1: project scaffolded (Next.js + Tailwind + Prisma/SQLite + NextAuth).
+Day 1: project scaffolded (Next.js + Tailwind + Prisma/SQLite + bcryptjs/iron-session for auth).
+Catalogue is imported from a shared MongoDB source (see `architecture.md`).
 See `requirements.md` for scope and `architecture.md` for the technical design.
 
 ## Note for Claude

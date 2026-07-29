@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Furniture Buyer",
-  description: "Browse furniture and place orders against your budget.",
+  title: "Lucky Sofa 88",
+  description: "Browse the catalogue and place orders against your budget.",
 };
 
 export default function RootLayout({ children }) {
@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">
+      <body className="min-h-full flex flex-col">
         <Navbar />
         <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8">
           {children}

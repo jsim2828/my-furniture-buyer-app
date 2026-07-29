@@ -25,18 +25,18 @@ export default async function OrdersPage() {
       </div>
 
       {orders.length === 0 ? (
-        <p className="text-stone-600">You haven&apos;t placed any orders yet.</p>
+        <p className="text-oyster-400">You haven&apos;t placed any orders yet.</p>
       ) : (
         <ul className="flex flex-col gap-4">
           {orders.map((order) => (
-            <li key={order.id} className="rounded-lg border border-stone-200 bg-white p-4">
-              <div className="flex justify-between text-sm text-stone-500 mb-2">
+            <li key={order.id} className="rounded-lg border border-chrome-600/30 bg-aubergine-800 p-4">
+              <div className="flex justify-between text-sm text-oyster-400 mb-2">
                 <span>{new Date(order.createdAt).toLocaleString()}</span>
-                <span className="font-medium text-stone-900">
+                <span className="font-medium text-marigold-300">
                   Total: ${order.total.toFixed(2)}
                 </span>
               </div>
-              <ul className="flex flex-col gap-1 text-sm">
+              <ul className="flex flex-col gap-1 text-sm text-oyster-200">
                 {order.items.map((item) => (
                   <li key={item.id} className="flex justify-between">
                     <span>

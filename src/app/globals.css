@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
+/*
+ * Lucky Sofa 88 — 1971 Palm Springs glamour: chrome, smoked glass, curved
+ * modular seating. Warm, dim, lamplit — a room at 11pm, not a showroom at
+ * noon. The palette is deliberately dark by default; this isn't a light/dark
+ * mode toggle, it's the brand.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-aubergine-950: #1c1119;
+  --color-aubergine-900: #261623;
+  --color-aubergine-800: #35202f;
+  --color-aubergine-700: #472a3f;
+  --color-aubergine-600: #5c3752;
+
+  --color-marigold-300: #e8c47c;
+  --color-marigold-400: #dfab55;
+  --color-marigold-500: #d18f3c;
+  --color-marigold-600: #b1732a;
+
+  --color-tangerine-400: #ff8a50;
+  --color-tangerine-500: #f2652e;
+  --color-tangerine-600: #d84f1c;
+
+  --color-chrome-200: #e7e9ec;
+  --color-chrome-300: #ccd0d5;
+  --color-chrome-400: #aab0b8;
+  --color-chrome-500: #888f98;
+  --color-chrome-600: #666d76;
+
+  --color-oyster-100: #fbf7ee;
+  --color-oyster-200: #f1e6d3;
+  --color-oyster-300: #e2d3b8;
+  --color-oyster-400: #c3b193;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-aubergine-950: var(--color-aubergine-950);
+  --color-aubergine-900: var(--color-aubergine-900);
+  --color-aubergine-800: var(--color-aubergine-800);
+  --color-aubergine-700: var(--color-aubergine-700);
+  --color-aubergine-600: var(--color-aubergine-600);
+
+  --color-marigold-300: var(--color-marigold-300);
+  --color-marigold-400: var(--color-marigold-400);
+  --color-marigold-500: var(--color-marigold-500);
+  --color-marigold-600: var(--color-marigold-600);
+
+  --color-tangerine-400: var(--color-tangerine-400);
+  --color-tangerine-500: var(--color-tangerine-500);
+  --color-tangerine-600: var(--color-tangerine-600);
+
+  --color-chrome-200: var(--color-chrome-200);
+  --color-chrome-300: var(--color-chrome-300);
+  --color-chrome-400: var(--color-chrome-400);
+  --color-chrome-500: var(--color-chrome-500);
+  --color-chrome-600: var(--color-chrome-600);
+
+  --color-oyster-100: var(--color-oyster-100);
+  --color-oyster-200: var(--color-oyster-200);
+  --color-oyster-300: var(--color-oyster-300);
+  --color-oyster-400: var(--color-oyster-400);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-aubergine-950);
+  color: var(--color-oyster-200);
   font-family: Arial, Helvetica, sans-serif;
+  /* A soft lamp-glow in the corner rather than flat, even darkness. */
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(242, 101, 46, 0.16), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 20%, rgba(209, 143, 60, 0.12), transparent 60%);
+  background-repeat: no-repeat;
+  min-height: 100%;
 }

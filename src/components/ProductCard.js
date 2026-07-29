@@ -1,6 +1,6 @@
 export function ProductCard({ product }) {
   return (
-    <div className="rounded-lg border border-stone-200 bg-white overflow-hidden flex flex-col">
+    <div className="rounded-lg border border-chrome-600/30 bg-aubergine-800 overflow-hidden flex flex-col">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={product.image}
@@ -9,20 +9,20 @@ export function ProductCard({ product }) {
         className="w-full h-40 object-cover"
       />
       <div className="p-4 flex flex-col gap-2 flex-1">
-        <span className="text-xs uppercase tracking-wide text-stone-500">
+        <span className="text-xs uppercase tracking-wide text-marigold-400">
           {product.category}
         </span>
-        <h3 className="font-medium text-stone-900">{product.name}</h3>
-        <p className="text-stone-700">${product.price.toFixed(2)}</p>
+        <h3 className="font-medium text-oyster-100">{product.name}</h3>
+        <p className="text-marigold-300">${product.price.toFixed(2)}</p>
 
-        <label className="mt-auto flex items-center gap-2 text-sm text-stone-600">
+        <label className="mt-auto flex items-center gap-2 text-sm text-oyster-400">
           Quantity
           <input
             type="number"
             name={`qty-${product.id}`}
             min="0"
             defaultValue="0"
-            className="w-16 rounded-md border border-stone-300 px-2 py-1"
+            className="w-16 rounded-md border border-chrome-500/50 bg-aubergine-900 text-oyster-100 px-2 py-1 focus:outline-none focus:border-tangerine-400"
           />
         </label>
       </div>

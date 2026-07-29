@@ -13,7 +13,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-md bg-stone-900 text-white px-4 py-2 hover:bg-stone-700 disabled:opacity-50"
+      className="rounded-md bg-tangerine-500 text-aubergine-950 font-medium px-4 py-2 hover:bg-tangerine-400 disabled:opacity-50"
     >
       {pending ? "Placing order..." : "Place order"}
     </button>
@@ -26,7 +26,7 @@ export function OrderForm({ products }) {
   return (
     <form action={formAction} className="flex flex-col gap-6">
       {state?.error && (
-        <p className="rounded-md bg-red-50 border border-red-200 text-red-700 px-4 py-2 text-sm">
+        <p className="rounded-md bg-aubergine-800 border border-tangerine-600 text-oyster-100 px-4 py-2 text-sm">
           {state.error}
         </p>
       )}
