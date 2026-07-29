@@ -53,7 +53,25 @@ Four tables (defined in `prisma/schema.prisma`):
 | name | string | |
 | price | number | |
 | category | string | |
-| image | string | path/URL to an image |
+| image | string | local path under `/public/products`, e.g. `/products/00368814.jpg` |
+
+### Catalog data source
+Products are real furniture data (762 items) imported from a shared MongoDB
+database provided for the hackathon, rather than hand-written placeholders.
+`prisma/seed.js` connects using the `MONGODB_URI` environment variable
+(kept out of source control, in `.env`), reads the `catalog` collection, and
+for each item:
+- maps `product_name` → `name`, `price` → `price`, `category` → `category`
+- decodes the embedded base64 image data to a real `.jpg` file under
+  `public/products/` and stores that file's path as `image`
+
+Images are written to disk rather than kept as base64 in the database so
+product listing pages stay small and fast — the database only stores a short
+path string, and the browser loads each image as a normal cached file
+instead of a large inline blob.
+
+Re-run `node prisma/seed.js` any time to refresh the catalog from the source
+database (this replaces all existing products).
 
 **Order**
 | field | type | notes |
